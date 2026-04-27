@@ -21,7 +21,7 @@ let state = {
     history: [],
     nb_pending: false,
   },
-  is_admin: false
+  is_admin: true // Default to true for full access
 };
 
 let currentState = null; // Used for change detection in updateUI
@@ -33,14 +33,13 @@ function loadState() {
     const parsed = JSON.parse(saved);
     state = { ...state, ...parsed };
   }
-  state.is_admin = localStorage.getItem(ADMIN_KEY) === "true";
+  state.is_admin = true; // Always true in this version
   return state;
 }
 
 /** Save state to localStorage. */
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  localStorage.setItem(ADMIN_KEY, state.is_admin.toString());
 }
 
 // ── Game Logic ─────────────────────────────────────────────────────
@@ -106,22 +105,7 @@ function getFullState() {
 // ── Actions ────────────────────────────────────────────────────────
 
 function toggleAdmin() {
-  if (state.is_admin) {
-    if (confirm("Exit Admin mode?")) {
-      state.is_admin = false;
-      saveState();
-      refreshUI();
-    }
-  } else {
-    const password = prompt("Enter Admin Password (default: admin):");
-    if (password === "admin") {
-      state.is_admin = true;
-      saveState();
-      refreshUI();
-    } else if (password !== null) {
-      alert("Incorrect password.");
-    }
-  }
+  // Logic removed for this version as access is default
 }
 
 function sendBall(type) {
@@ -328,24 +312,15 @@ function updateUI(state, ballType) {
   const controlsSection = document.getElementById("controlsSection");
   const loginBtn = document.getElementById("loginBtn");
 
-  if (state.is_admin) {
-    inputSection.classList.remove("hidden");
-    controlsSection.classList.remove("hidden");
-    loginBtn.textContent = "Exit Admin";
-    loginBtn.style.background = "rgba(248,81,73,0.1)";
-    loginBtn.style.color = "var(--accent-red)";
-  } else {
-    inputSection.classList.add("hidden");
-    controlsSection.classList.add("hidden");
-    loginBtn.textContent = "Admin Login";
-    loginBtn.style.background = "rgba(0,0,0,0.05)";
-    loginBtn.style.color = "var(--text-secondary)";
-  }
+  // Always show controls in this version
+  inputSection.classList.remove("hidden");
+  controlsSection.classList.remove("hidden");
+  if (loginBtn) loginBtn.classList.add("hidden");
 
   // ── Overs selector ──
   const oversSelector = document.getElementById("oversSelector");
   const oversValueEl  = document.getElementById("oversValue");
-  if (state.is_admin && state.innings === 1 && !state.match_over) {
+  if (state.innings === 1 && !state.match_over) {
     oversSelector.classList.remove("hidden");
     oversValueEl.textContent = state.max_overs;
   } else {
