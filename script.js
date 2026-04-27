@@ -60,11 +60,15 @@ function checkMatchOver() {
   const current = state.current;
   const max_balls = state.max_overs * 6;
 
+  // 1. All out
   if (current.wickets >= 10) return true;
+  
+  // 2. Overs finished
   if (current.balls >= max_balls) return true;
 
+  // 3. Target chased (2nd innings)
   if (state.innings === 2 && state.first_innings_score !== null) {
-    if (current.score > state.first_innings_score) return true;
+    if (state.current.score > state.first_innings_score) return true;
   }
 
   return false;
@@ -76,27 +80,31 @@ function getFullState() {
   const max_balls = state.max_overs * 6;
   
   let rrr = null;
+  let target = null;
   if (state.innings === 2 && first_score !== null) {
+    target = first_score + 1;
     const balls_remaining = max_balls - current.balls;
     if (balls_remaining > 0) {
       const overs_remaining = balls_remaining / 6;
-      const runs_needed = (first_score + 1) - current.score;
+      const runs_needed = target - current.score;
       rrr = runs_needed > 0 ? runs_needed / overs_remaining : 0.0;
     } else {
       rrr = 0.0;
     }
   }
 
+  const isOver = checkMatchOver();
+
   return {
     ...current,
     innings: state.innings,
     max_overs: state.max_overs,
-    target: (first_score !== null) ? first_score + 1 : null,
+    target: target,
     first_innings_score: first_score,
     required_run_rate: rrr,
     overs: computeOvers(current.balls),
     run_rate: computeRunRate(current.score, current.balls),
-    match_over: checkMatchOver(),
+    match_over: isOver,
     is_admin: state.is_admin,
     history: current.history.slice(-10)
   };
