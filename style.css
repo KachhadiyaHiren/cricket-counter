@@ -408,6 +408,12 @@ body {
   font-size: 1.15rem;
 }
 
+.ball-btn.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
 /* ── Ball Animations ─────────────────────────────────────────────── */
 /* 4 – Flash green */
 @keyframes flash4 {

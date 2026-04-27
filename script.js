@@ -442,11 +442,20 @@ function showMatchOver(state) {
   const overlay = document.getElementById("matchOverOverlay");
   const title   = document.getElementById("matchOverTitle");
   const sub     = document.getElementById("matchOverSub");
+  const startBtn = document.getElementById("overlayStartSecond");
+  const newBtn   = document.getElementById("overlayNewMatch");
+
   overlay.classList.remove("hidden");
+
   if (state.innings === 1) {
     title.textContent = "Innings Over!";
     sub.textContent   = `Final Score: ${state.score}/${state.wickets} (${state.overs} ov)`;
+    if (startBtn) startBtn.classList.remove("hidden");
+    if (newBtn) newBtn.classList.add("hidden");
   } else if (state.innings === 2) {
+    if (startBtn) startBtn.classList.add("hidden");
+    if (newBtn) newBtn.classList.remove("hidden");
+
     if (state.score > (state.first_innings_score || 0)) {
       title.textContent = "Target Chased! 🎉";
       sub.textContent   = `Won by ${10 - state.wickets} wickets`;
@@ -454,6 +463,10 @@ function showMatchOver(state) {
       const diff = (state.first_innings_score || 0) - state.score;
       title.textContent = "Match Over!";
       sub.textContent   = diff > 0 ? `Lost by ${diff} runs` : "Match Tied!";
+    } else {
+      // Not actually over, but maybe wickets down?
+      title.textContent = "All Out!";
+      sub.textContent   = `Final Score: ${state.score}/${state.wickets}`;
     }
   }
 }
