@@ -507,12 +507,12 @@ function renderGeneratedTeams() {
   if (state.team1.length === 0) {
     listA.innerHTML = `<li class="tpi-empty">No players assigned</li>`;
   } else {
-    listA.innerHTML = state.team1.map(p => `
+       listA.innerHTML = state.team1.map(p => `
       <li class="team-player-item">
         <span class="tpi-name">${p.name}${p.isCaptain ? ' <span class="tpi-cap">(c)</span>' : ''}</span>
-        <span class="tpi-role">${p.role}</span>
+        <span class="tpi-role" title="${p.role}">${roleIcon(p.role)}</span>
         <div class="tpi-actions">
-          <button class="tpi-btn tpi-cap-btn${p.isCaptain ? ' active' : ''}" onclick="togglePlayerCaptain('${p.id}')">${p.isCaptain ? 'Cap' : 'Cap?'}</button>
+          <button class="tpi-btn tpi-cap-btn${p.isCaptain ? ' active' : ''}" onclick="togglePlayerCaptain('${p.id}', 1)">${p.isCaptain ? 'Cap' : 'Cap?'}</button>
           <button class="tpi-btn tpi-switch" onclick="movePlayerToTeam('${p.id}', 2)">T2</button>
           <button class="tpi-btn tpi-del" onclick="removePlayerFromTeam('${p.id}')">✕</button>
         </div>
@@ -527,12 +527,12 @@ function renderGeneratedTeams() {
   if (state.team2.length === 0) {
     listB.innerHTML = `<li class="tpi-empty">No players assigned</li>`;
   } else {
-    listB.innerHTML = state.team2.map(p => `
+     listB.innerHTML = state.team2.map(p => `
       <li class="team-player-item">
         <span class="tpi-name">${p.name}${p.isCaptain ? ' <span class="tpi-cap">(c)</span>' : ''}</span>
-        <span class="tpi-role">${p.role}</span>
+        <span class="tpi-role" title="${p.role}">${roleIcon(p.role)}</span>
         <div class="tpi-actions">
-          <button class="tpi-btn tpi-cap-btn${p.isCaptain ? ' active' : ''}" onclick="togglePlayerCaptain('${p.id}')">${p.isCaptain ? 'Cap' : 'Cap?'}</button>
+          <button class="tpi-btn tpi-cap-btn${p.isCaptain ? ' active' : ''}" onclick="togglePlayerCaptain('${p.id}', 2)">${p.isCaptain ? 'Cap' : 'Cap?'}</button>
           <button class="tpi-btn tpi-switch" onclick="movePlayerToTeam('${p.id}', 1)">T1</button>
           <button class="tpi-btn tpi-del" onclick="removePlayerFromTeam('${p.id}')">✕</button>
         </div>
@@ -541,10 +541,29 @@ function renderGeneratedTeams() {
   }
 }
 
-function togglePlayerCaptain(playerId) {
+function roleIcon(role) {
+  if (role === 'Batter') return '🏏';
+  if (role === 'Bowler') return '🥎';
+  return '⚡'; // All-rounder
+}
+
+function togglePlayerCaptain(playerId, teamNum) {
   const p = state.players.find(x => x.id === playerId);
   if (!p) return;
-  p.isCaptain = !p.isCaptain;
+
+  if (p.isCaptain) {
+    // Already captain — un-captain them
+    p.isCaptain = false;
+  } else {
+    // Remove captain from anyone else in the same team first
+    const team = teamNum === 1 ? state.team1 : state.team2;
+    team.forEach(tp => {
+      const tp_player = state.players.find(x => x.id === tp.id);
+      if (tp_player) tp_player.isCaptain = false;
+    });
+    p.isCaptain = true;
+  }
+
   saveState();
   renderAll();
 }
