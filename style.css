@@ -1693,3 +1693,132 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
 }
+
+/* ── MOBILE RESPONSIVENESS OVERRIDES ── */
+@media (max-width: 480px) {
+  /* Reduce body/app container margins */
+  .tab-panel {
+    padding: 0.75rem;
+  }
+  
+  .card {
+    padding: 1rem;
+    margin-bottom: 0.85rem;
+  }
+
+  /* Header and Navigation */
+  .app-header {
+    padding: 0.75rem 0.75rem 0.25rem;
+  }
+  
+  .logo-title {
+    font-size: 1.5rem;
+  }
+
+  .nav-tab {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.25rem;
+    min-width: 70px;
+    gap: 0.2rem;
+  }
+  
+  .tab-label {
+    font-size: 0.8rem;
+  }
+
+  /* Add Player Inputs stacked on mobile */
+  .input-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .form-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem !important;
+  }
+
+  .form-footer .checkbox-container {
+    padding-left: 1.75rem;
+  }
+
+  /* Available players list padding */
+  .team-player-item {
+    font-size: 0.82rem;
+    padding: 0.4rem 0.5rem;
+  }
+  
+  .team-player-item button.btn-sm {
+    padding: 0.2rem 0.35rem;
+    font-size: 0.65rem;
+  }
+
+  /* Sticky Scorecard Banner text scaling */
+  .scoreboard-hero {
+    top: 79px; /* Anchors correctly under the smaller header */
+    padding: 1rem;
+  }
+
+  .runs-num {
+    font-size: 3.25rem;
+  }
+
+  .wickets-num {
+    font-size: 2.25rem;
+  }
+
+  .slash {
+    font-size: 1.75rem;
+  }
+
+  .live-stats-row {
+    font-size: 0.8rem;
+  }
+
+  /* Keypad size adjustment */
+  .score-btn {
+    font-size: 1.2rem;
+    padding: 0.75rem 0.25rem;
+  }
+
+  /* Modals cards sizing */
+  .modal-card {
+    padding: 1.25rem;
+    max-width: 96vw;
+  }
+
+  /* Series cumulative stats table columns width */
+  .stats-table th, .stats-table td {
+    padding: 0.45rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .stats-table td strong {
+    font-size: 0.8rem;
+  }
+  
+  /* Prevent scroll wrapper from overflowing */
+  .stats-table-wrapper {
+    margin: 0 -0.5rem;
+    padding: 0 0.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .tab-label {
+    display: none; /* Hide labels on ultra narrow screens, only show icons */
+  }
+  
+  .nav-tab {
+    min-width: 45px;
+    padding: 0.5rem 0.1rem;
+  }
+
+  .runs-num {
+    font-size: 2.75rem;
+  }
+
+  .wickets-num {
+    font-size: 1.85rem;
+  }
+}
