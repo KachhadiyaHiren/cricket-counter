@@ -10,15 +10,15 @@ const STORAGE_KEY = "cricscore_extended_state_clean_v10";
 
 // ── DEFAULT 20 PLAYERS POOL ──
 const DEFAULT_PLAYERS = [
-  { id: "p1", name: "Ambar", role: "All-rounder", isCaptain: true, isCommon: false, available: true },
-  { id: "p2", name: "Hardik", role: "All-rounder", isCaptain: true, isCommon: false, available: true },
+  { id: "p1", name: "Ambar", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
+  { id: "p2", name: "Hardik", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
   { id: "p3", name: "Umesh", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
   { id: "p4", name: "Mehul", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
   { id: "p5", name: "krish", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
-  { id: "p6", name: "j acharya", role: "All-rounder", isCaptain: true, isCommon: false, available: true },
+  { id: "p6", name: "j acharya", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
   { id: "p7", name: "Hiren", role: "Bowler", isCaptain: false, isCommon: false, available: true },
-  { id: "p8", name: "Dhruvil", role: "Batter", isCaptain: true, isCommon: false, available: true },
-  { id: "p9", name: "Naresh Chanchad", role: "All-rounder", isCaptain: true, isCommon: false, available: true },
+  { id: "p8", name: "Dhruvil", role: "Batter", isCaptain: false, isCommon: false, available: true },
+  { id: "p9", name: "Naresh Chanchad", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
   { id: "p10", name: "Tarun", role: "Bowler", isCaptain: false, isCommon: false, available: true },
   { id: "p11", name: "Prerak", role: "Batter", isCaptain: false, isCommon: false, available: true },
   { id: "p12", name: "Shyam", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
@@ -267,8 +267,6 @@ function updatePoolSummaryText() {
 function addPlayerFromForm() {
   const nameInput = document.getElementById("playerName");
   const roleInput = document.getElementById("playerRole");
-  const captainInput = document.getElementById("playerIsCaptain");
-  const commonInput = document.getElementById("playerIsCommon");
 
   const name = nameInput.value.trim();
   if (!name) return;
@@ -277,8 +275,8 @@ function addPlayerFromForm() {
     id: "p_" + Date.now(),
     name: name,
     role: roleInput.value,
-    isCaptain: captainInput.checked,
-    isCommon: commonInput ? commonInput.checked : false,
+    isCaptain: false,
+    isCommon: false,
     available: true
   };
 
@@ -287,9 +285,7 @@ function addPlayerFromForm() {
 
   // Reset Form
   nameInput.value = "";
-  captainInput.checked = false;
-  if (commonInput) commonInput.checked = false;
-  
+
   renderPlayerPool();
 }
 
@@ -305,15 +301,6 @@ function editPlayerPrompt(id) {
   const roleOpts = ["Batter", "Bowler", "All-rounder"];
   const newRole = prompt(`Edit Role (${roleOpts.join("/")}):`, p.role);
   if (newRole && roleOpts.includes(newRole)) p.role = newRole;
-
-  const isComm = confirm(`Is ${p.name} a Common Player (Neutral)?`);
-  p.isCommon = isComm;
-  if (p.isCommon) {
-    p.isCaptain = false;
-  } else {
-    const isCap = confirm(`Is ${p.name} a Captain?`);
-    p.isCaptain = isCap;
-  }
 
   saveState();
   renderPlayerPool();
