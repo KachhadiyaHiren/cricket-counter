@@ -218,7 +218,9 @@ function renderPlayerPool() {
 
     // Player Name Cell
     const tdName = document.createElement("td");
-    tdName.innerHTML = `${p.name} ${p.isCaptain ? '<span class="captain-badge" title="Captain">👑</span>' : ''} ${p.isCommon ? '<span class="common-badge" title="Common Player" style="background:rgba(59,130,246,0.15); color:var(--accent-blue); padding:0.15rem 0.4rem; border-radius:var(--radius-sm); font-size:0.7rem; border:1px solid rgba(59,130,246,0.3); margin-left:0.25rem;">🤝 Common</span>' : ''}`;
+    const capTag = p.isCaptain ? ' <span class="pool-tag pool-tag-cap">(c)</span>' : '';
+    const comTag = p.isCommon ? ' <span class="pool-tag pool-tag-com">(cp)</span>' : '';
+    tdName.innerHTML = `${p.name}${capTag}${comTag}`;
     tr.appendChild(tdName);
 
     // Role Cell
@@ -229,18 +231,18 @@ function renderPlayerPool() {
     // Actions Cell
     const tdActions = document.createElement("td");
     tdActions.className = "actions-cell";
-    
-    // Edit role/name button
+
+    // Edit button
     const btnEdit = document.createElement("button");
     btnEdit.className = "btn-icon";
-    btnEdit.innerHTML = "✏️";
-    btnEdit.title = "Change Name / Role";
+    btnEdit.textContent = "Edit";
+    btnEdit.title = "Edit Player";
     btnEdit.addEventListener("click", () => editPlayerPrompt(p.id));
 
     // Delete button
     const btnDel = document.createElement("button");
     btnDel.className = "btn-icon delete";
-    btnDel.innerHTML = "🗑️";
+    btnDel.textContent = "Del";
     btnDel.title = "Delete Player";
     btnDel.addEventListener("click", () => deletePlayer(p.id));
 
@@ -472,11 +474,13 @@ function renderGeneratedTeams() {
   if (unassigned.length > 0) {
     unassignedWrapper.classList.remove("hidden");
     unassignedList.innerHTML = unassigned.map(p => `
-      <div class="team-player-item" style="padding: 0.5rem 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
-        <span><strong>${p.name}</strong> <span style="font-size:0.75rem;color:var(--text-secondary);">${p.role}</span></span>
-        <button class="btn btn-sm btn-primary" onclick="addPlayerToTeam('${p.id}', 1)" style="padding:0.25rem 0.5rem;font-size:0.7rem;">+ T1</button>
-        <button class="btn btn-sm btn-outline" onclick="addPlayerToTeam('${p.id}', 2)" style="padding:0.25rem 0.5rem;font-size:0.7rem;color:var(--accent-blue);border-color:var(--accent-blue);">+ T2</button>
-        <button class="btn btn-sm btn-outline" onclick="makePlayerCommon('${p.id}')" style="padding:0.25rem 0.5rem;font-size:0.7rem;color:var(--accent-yellow);border-color:var(--accent-yellow);">+ 🤝 Common</button>
+      <div class="unassigned-row">
+        <span class="unassigned-name">${p.name} <span class="unassigned-role">${p.role}</span></span>
+        <div class="unassigned-actions">
+          <button class="ua-btn ua-t1" onclick="addPlayerToTeam('${p.id}', 1)">T1</button>
+          <button class="ua-btn ua-t2" onclick="addPlayerToTeam('${p.id}', 2)">T2</button>
+          <button class="ua-btn ua-com" onclick="makePlayerCommon('${p.id}')">Common</button>
+        </div>
       </div>
     `).join("");
   } else {
@@ -514,18 +518,16 @@ function renderGeneratedTeams() {
   document.getElementById("teamAMeta").textContent = getStatsText(state.team1);
   const listA = document.getElementById("teamAPlayerList");
   if (state.team1.length === 0) {
-    listA.innerHTML = `<li class="text-muted text-center" style="padding: 1rem; font-size: 0.85rem;">No players assigned</li>`;
+    listA.innerHTML = `<li class="tpi-empty">No players assigned</li>`;
   } else {
     listA.innerHTML = state.team1.map(p => `
       <li class="team-player-item">
-        <span class="player-item-name">
-          <button class="btn-icon delete" onclick="removePlayerFromTeam('${p.id}')" style="margin-right: 0.25rem;" title="Remove">✕</button>
-          ${p.name} ${p.isCaptain ? '<span class="captain-badge">👑</span>' : ''}
-        </span>
-        <div style="display: flex; align-items: center; gap: 0.4rem;">
-          <span class="player-item-role">${p.role}</span>
-          <button class="btn-icon" onclick="makePlayerCommon('${p.id}')" title="Make Common Player">🤝</button>
-          <button class="btn-icon" onclick="movePlayerToTeam('${p.id}', 2)" title="Move to Team 2">➡️</button>
+        <span class="tpi-name">${p.name}${p.isCaptain ? ' <span class="tpi-cap">(c)</span>' : ''}</span>
+        <span class="tpi-role">${p.role}</span>
+        <div class="tpi-actions">
+          <button class="tpi-btn tpi-cap-btn${p.isCaptain ? ' active' : ''}" onclick="togglePlayerCaptain('${p.id}')">${p.isCaptain ? 'Cap' : 'Cap?'}</button>
+          <button class="tpi-btn tpi-switch" onclick="movePlayerToTeam('${p.id}', 2)">T2</button>
+          <button class="tpi-btn tpi-del" onclick="removePlayerFromTeam('${p.id}')">✕</button>
         </div>
       </li>
     `).join("");
@@ -536,22 +538,28 @@ function renderGeneratedTeams() {
   document.getElementById("teamBMeta").textContent = getStatsText(state.team2);
   const listB = document.getElementById("teamBPlayerList");
   if (state.team2.length === 0) {
-    listB.innerHTML = `<li class="text-muted text-center" style="padding: 1rem; font-size: 0.85rem;">No players assigned</li>`;
+    listB.innerHTML = `<li class="tpi-empty">No players assigned</li>`;
   } else {
     listB.innerHTML = state.team2.map(p => `
       <li class="team-player-item">
-        <span class="player-item-name">
-          <button class="btn-icon delete" onclick="removePlayerFromTeam('${p.id}')" style="margin-right: 0.25rem;" title="Remove">✕</button>
-          ${p.name} ${p.isCaptain ? '<span class="captain-badge">👑</span>' : ''}
-        </span>
-        <div style="display: flex; align-items: center; gap: 0.4rem;">
-          <span class="player-item-role">${p.role}</span>
-          <button class="btn-icon" onclick="makePlayerCommon('${p.id}')" title="Make Common Player">🤝</button>
-          <button class="btn-icon" onclick="movePlayerToTeam('${p.id}', 1)" title="Move to Team 1">⬅️</button>
+        <span class="tpi-name">${p.name}${p.isCaptain ? ' <span class="tpi-cap">(c)</span>' : ''}</span>
+        <span class="tpi-role">${p.role}</span>
+        <div class="tpi-actions">
+          <button class="tpi-btn tpi-cap-btn${p.isCaptain ? ' active' : ''}" onclick="togglePlayerCaptain('${p.id}')">${p.isCaptain ? 'Cap' : 'Cap?'}</button>
+          <button class="tpi-btn tpi-switch" onclick="movePlayerToTeam('${p.id}', 1)">T1</button>
+          <button class="tpi-btn tpi-del" onclick="removePlayerFromTeam('${p.id}')">✕</button>
         </div>
       </li>
     `).join("");
   }
+}
+
+function togglePlayerCaptain(playerId) {
+  const p = state.players.find(x => x.id === playerId);
+  if (!p) return;
+  p.isCaptain = !p.isCaptain;
+  saveState();
+  renderAll();
 }
 
 function makePlayerCommon(playerId) {
