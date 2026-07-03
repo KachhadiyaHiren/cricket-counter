@@ -688,7 +688,9 @@ function flipCoin() {
   coin.classList.remove("spin-h", "spin-t");
   void coin.offsetWidth; 
   
-  const isHeads = Math.random() >= 0.5;
+  const randArray = new Uint32Array(1);
+  window.crypto.getRandomValues(randArray);
+  const isHeads = randArray[0] % 2 === 0;
   const finalResult = isHeads ? "Heads" : "Tails";
   
   const animClass = isHeads ? "spin-h" : "spin-t";
@@ -785,6 +787,8 @@ function startMatchScorecard() {
   
   state.team1.forEach(initializeStats);
   state.team2.forEach(initializeStats);
+  const commonPlayers = state.players.filter(p => p.isCommon && p.available);
+  commonPlayers.forEach(initializeStats);
   
   state.current = {
     score: 0,
@@ -812,20 +816,24 @@ function showOpenersDialog() {
 
   const batTeam = state.battingTeam === "team1" ? state.team1 : state.team2;
   const bowlTeam = state.bowlingTeam === "team1" ? state.team1 : state.team2;
+  const commonPlayers = state.players.filter(p => p.isCommon && p.available);
+  
+  const totalBatTeam = [...batTeam, ...commonPlayers];
+  const totalBowlTeam = [...bowlTeam, ...commonPlayers];
   
   const strikerSel = document.getElementById("openerStriker");
   const nonStrikerSel = document.getElementById("openerNonStriker");
 
-  const optionsHtml = batTeam.map(p => `<option value="${p.id}">${p.name} (${p.role})</option>`).join("");
+  const optionsHtml = totalBatTeam.map(p => `<option value="${p.id}">${p.name} (${p.role})</option>`).join("");
   strikerSel.innerHTML = optionsHtml;
   nonStrikerSel.innerHTML = optionsHtml;
   
-  if (batTeam.length > 1) {
+  if (totalBatTeam.length > 1) {
     nonStrikerSel.selectedIndex = 1;
   }
 
   const bowlerSel = document.getElementById("newBowlerSelect");
-  bowlerSel.innerHTML = bowlTeam.map(p => `<option value="${p.id}">${p.name} (${p.role})</option>`).join("");
+  bowlerSel.innerHTML = totalBowlTeam.map(p => `<option value="${p.id}">${p.name} (${p.role})</option>`).join("");
 
   backdrop.classList.remove("hidden");
 }
@@ -1048,7 +1056,10 @@ function showWicketDismissalDialog(outPlayerId, isRunOutOnNb = false) {
   }
 
   const batTeam = state.battingTeam === "team1" ? state.team1 : state.team2;
-  const yetToBat = batTeam.filter(p => {
+  const commonPlayers = state.players.filter(p => p.isCommon && p.available);
+  const totalBatTeam = [...batTeam, ...commonPlayers];
+  
+  const yetToBat = totalBatTeam.filter(p => {
     const stats = state.playerStats[p.id];
     return p.id !== state.strikerId && p.id !== state.nonStrikerId && (!stats || !stats.out);
   });
@@ -1145,11 +1156,13 @@ function checkMatchProgress() {
   const cur = state.current;
   const maxBalls = state.maxOvers * 6;
   const batTeam = state.battingTeam === "team1" ? state.team1 : state.team2;
+  const commonPlayers = state.players.filter(p => p.isCommon && p.available);
+  const totalBatTeam = [...batTeam, ...commonPlayers];
   
   let inningsFinished = false;
   let reason = "";
 
-  const maxPossibleWickets = batTeam.length - 1;
+  const maxPossibleWickets = totalBatTeam.length - 1;
   if (cur.wickets >= Math.min(10, maxPossibleWickets)) {
     inningsFinished = true;
     reason = "All Out!";
@@ -1208,14 +1221,16 @@ function checkMatchProgress() {
 
 function showBowlerSelectorDialog() {
   const bowlTeam = state.bowlingTeam === "team1" ? state.team1 : state.team2;
+  const commonPlayers = state.players.filter(p => p.isCommon && p.available);
+  const totalBowlTeam = [...bowlTeam, ...commonPlayers];
   const selectNew = document.getElementById("newBowlerSelect");
   
   if (!selectNew) return;
 
-  const availableBowlers = bowlTeam.filter(p => p.id !== state.lastBowlerId);
+  const availableBowlers = totalBowlTeam.filter(p => p.id !== state.lastBowlerId);
   
   if (availableBowlers.length === 0) {
-    selectNew.innerHTML = bowlTeam.map(p => `<option value="${p.id}">${p.name}</option>`).join("");
+    selectNew.innerHTML = totalBowlTeam.map(p => `<option value="${p.id}">${p.name}</option>`).join("");
   } else {
     selectNew.innerHTML = availableBowlers.map(p => `<option value="${p.id}">${p.name}</option>`).join("");
   }
@@ -1257,7 +1272,10 @@ function showInningsOverOverlay(isMatchComplete, reason) {
     
     let winnerMsg = "";
     if (score2 > score1) {
-      const wicketsLeft = (state.battingTeam === "team1" ? state.team1.length : state.team2.length) - 1 - state.current.wickets;
+      const batTeam = state.battingTeam === "team1" ? state.team1 : state.team2;
+      const commonPlayers = state.players.filter(p => p.isCommon && p.available);
+      const batTeamSize = batTeam.length + commonPlayers.length;
+      const wicketsLeft = batTeamSize - 1 - state.current.wickets;
       winnerMsg = `${team2Name} won by ${wicketsLeft} wickets! 🎉`;
     } else if (score1 > score2) {
       const margin = score1 - score2;
@@ -1410,6 +1428,8 @@ function startNextMatchSeries() {
   };
   state.team1.forEach(initializeStats);
   state.team2.forEach(initializeStats);
+  const commonPlayers = state.players.filter(p => p.isCommon && p.available);
+  commonPlayers.forEach(initializeStats);
 
   state.nextMatchBattingWinner = null; // Clear the series pending winner state
   saveState();
@@ -1472,6 +1492,8 @@ function restartCurrentMatch() {
   };
   state.team1.forEach(initializeStats);
   state.team2.forEach(initializeStats);
+  const commonPlayers = state.players.filter(p => p.isCommon && p.available);
+  commonPlayers.forEach(initializeStats);
 
   document.getElementById("inningsOverModal").classList.add("hidden");
   saveState();
