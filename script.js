@@ -225,7 +225,8 @@ function renderPlayerPool() {
 
     // Role Cell
     const tdRole = document.createElement("td");
-    tdRole.innerHTML = `<span class="player-item-role">${p.role}</span>`;
+    tdRole.style.textAlign = "center";
+    tdRole.innerHTML = `<span style="font-size:1.1rem; display:block; text-align:center;" title="${p.role}">${roleIcon(p.role)}</span>`;
     tr.appendChild(tdRole);
 
     // Actions Cell
@@ -462,7 +463,7 @@ function renderGeneratedTeams() {
     unassignedWrapper.classList.remove("hidden");
     unassignedList.innerHTML = unassigned.map(p => `
       <div class="unassigned-row">
-        <span class="unassigned-name">${p.name} <span class="unassigned-role">${p.role}</span></span>
+        <span class="unassigned-name">${p.name} <span class="unassigned-role" style="font-size: 0.95rem; margin-left: 0.25rem;" title="${p.role}">${roleIcon(p.role)}</span></span>
         <div class="unassigned-actions">
           <button class="ua-btn ua-t1" onclick="addPlayerToTeam('${p.id}', 1)">T1</button>
           <button class="ua-btn ua-t2" onclick="addPlayerToTeam('${p.id}', 2)">T2</button>
@@ -484,7 +485,7 @@ function renderGeneratedTeams() {
       commonList.innerHTML = commonPlayers.map(p => `
         <div class="team-player-item" style="padding: 0.4rem 0.75rem; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); display: flex; align-items: center; gap: 0.25rem;">
           <button class="btn-icon delete" onclick="unmakePlayerCommon('${p.id}')" style="margin-right: 0.25rem;" title="Remove Common">✕</button>
-          <strong>🤝 ${p.name}</strong> <span style="font-size:0.7rem; color:var(--text-secondary);">(${p.role})</span>
+          <strong>🤝 ${p.name}</strong> <span style="font-size:0.85rem; margin-left: 0.25rem;" title="${p.role}">${roleIcon(p.role)}</span>
         </div>
       `).join("");
     } else {
@@ -1833,8 +1834,18 @@ function populateBattingTable(elementId, squad, statsMap) {
 
     const sr = s.balls > 0 ? (s.runs / s.balls) * 100 : 0.0;
 
+    const isCurrentInnings = state.phase !== 'completed' && state.innings === (elementId.includes("Innings1") ? 1 : 2);
+    const isActiveBatsman = isCurrentInnings && (p.id === state.strikerId || p.id === state.nonStrikerId);
+    if (isActiveBatsman) {
+      tr.style.background = "rgba(16, 185, 129, 0.12)";
+    }
+
     tr.innerHTML = `
-      <td><strong>${p.name}</strong> ${p.isCaptain ? '<span style="font-size:0.7rem;font-weight:700;color:var(--accent-yellow);">(c)</span>' : ''}</td>
+      <td>
+        <strong>${p.name}</strong> 
+        ${p.isCaptain ? '<span style="font-size:0.7rem;font-weight:700;color:var(--accent-yellow);">(c)</span>' : ''} 
+        <span style="font-size:0.8rem; margin-left:0.25rem;" title="${p.role}">${roleIcon(p.role)}</span>
+      </td>
       <td class="text-muted" style="font-size:0.75rem;">${statusText}</td>
       <td class="text-right">${s.runs}</td>
       <td class="text-right">${s.balls}</td>
@@ -1868,8 +1879,17 @@ function populateBowlingTable(elementId, squad, statsMap) {
     const econ = s.bowledBalls > 0 ? (s.concededRuns / (s.bowledBalls / 6)) : 0.0;
     const overs = computeOvers(s.bowledBalls);
 
+    const isCurrentInnings = state.phase !== 'completed' && state.innings === (elementId.includes("Innings1") ? 1 : 2);
+    const isActiveBowler = isCurrentInnings && p.id === state.bowlerId;
+    if (isActiveBowler) {
+      tr.style.background = "rgba(59, 130, 246, 0.12)";
+    }
+
     tr.innerHTML = `
-      <td><strong>${p.name}</strong></td>
+      <td>
+        <strong>${p.name}</strong> 
+        <span style="font-size:0.8rem; margin-left:0.25rem;" title="${p.role}">${roleIcon(p.role)}</span>
+      </td>
       <td class="text-right">${overs}</td>
       <td class="text-right">${s.maidens}</td>
       <td class="text-right">${s.concededRuns}</td>
@@ -2068,7 +2088,7 @@ function renderCumulativeLeaderboard() {
       return `
         <tr class="expandable-row" onclick="toggleRowCollapse('${collapseId}', this)" style="cursor:pointer;">
           <td class="text-center text-muted collapse-arrow" style="font-size:0.75rem; color:var(--accent-blue);">▶</td>
-          <td><strong>${p.name}</strong> ${p.isCaptain ? '<span style="font-size:0.7rem;font-weight:700;color:var(--accent-yellow);">(c)</span>' : ''} <span style="font-size:0.7rem; color:var(--text-muted); margin-left:0.25rem;">${p.role}</span></td>
+          <td><strong>${p.name}</strong> ${p.isCaptain ? '<span style="font-size:0.7rem;font-weight:700;color:var(--accent-yellow);">(c)</span>' : ''} <span style="font-size:0.8rem; margin-left:0.25rem;" title="${p.role}">${roleIcon(p.role)}</span></td>
           <td class="text-right" style="font-weight:bold; color:var(--accent-green);">${t.batRuns}</td>
           <td class="text-right">${t.batBalls}</td>
           <td class="text-right">${t.batFours}</td>
@@ -2122,7 +2142,7 @@ function renderCumulativeLeaderboard() {
       return `
         <tr class="expandable-row" onclick="toggleRowCollapse('${collapseId}', this)" style="cursor:pointer;">
           <td class="text-center text-muted collapse-arrow" style="font-size:0.75rem; color:var(--accent-blue);">▶</td>
-          <td><strong>${p.name}</strong> ${p.isCaptain ? '<span style="font-size:0.7rem;font-weight:700;color:var(--accent-yellow);">(c)</span>' : ''} <span style="font-size:0.7rem; color:var(--text-muted); margin-left:0.25rem;">${p.role}</span></td>
+          <td><strong>${p.name}</strong> ${p.isCaptain ? '<span style="font-size:0.7rem;font-weight:700;color:var(--accent-yellow);">(c)</span>' : ''} <span style="font-size:0.8rem; margin-left:0.25rem;" title="${p.role}">${roleIcon(p.role)}</span></td>
           <td class="text-right" style="color:var(--accent-blue);">${overs}</td>
           <td class="text-right">${t.bowlMaidens}</td>
           <td class="text-right">${t.bowlRuns}</td>
