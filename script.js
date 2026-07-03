@@ -1834,7 +1834,7 @@ function populateBattingTable(elementId, squad, statsMap) {
     const sr = s.balls > 0 ? (s.runs / s.balls) * 100 : 0.0;
 
     tr.innerHTML = `
-      <td><strong>${p.name}</strong> ${p.isCaptain ? '👑' : ''}</td>
+      <td><strong>${p.name}</strong> ${p.isCaptain ? '<span style="font-size:0.7rem;font-weight:700;color:var(--accent-yellow);">(c)</span>' : ''}</td>
       <td class="text-muted" style="font-size:0.75rem;">${statusText}</td>
       <td class="text-right">${s.runs}</td>
       <td class="text-right">${s.balls}</td>
@@ -2068,7 +2068,7 @@ function renderCumulativeLeaderboard() {
       return `
         <tr class="expandable-row" onclick="toggleRowCollapse('${collapseId}', this)" style="cursor:pointer;">
           <td class="text-center text-muted collapse-arrow" style="font-size:0.75rem; color:var(--accent-blue);">▶</td>
-          <td><strong>${p.name}</strong> ${p.isCaptain ? '👑' : ''} <span style="font-size:0.7rem; color:var(--text-muted); margin-left:0.25rem;">${p.role}</span></td>
+          <td><strong>${p.name}</strong> ${p.isCaptain ? '<span style="font-size:0.7rem;font-weight:700;color:var(--accent-yellow);">(c)</span>' : ''} <span style="font-size:0.7rem; color:var(--text-muted); margin-left:0.25rem;">${p.role}</span></td>
           <td class="text-right" style="font-weight:bold; color:var(--accent-green);">${t.batRuns}</td>
           <td class="text-right">${t.batBalls}</td>
           <td class="text-right">${t.batFours}</td>
@@ -2122,7 +2122,7 @@ function renderCumulativeLeaderboard() {
       return `
         <tr class="expandable-row" onclick="toggleRowCollapse('${collapseId}', this)" style="cursor:pointer;">
           <td class="text-center text-muted collapse-arrow" style="font-size:0.75rem; color:var(--accent-blue);">▶</td>
-          <td><strong>${p.name}</strong> ${p.isCaptain ? '👑' : ''} <span style="font-size:0.7rem; color:var(--text-muted); margin-left:0.25rem;">${p.role}</span></td>
+          <td><strong>${p.name}</strong> ${p.isCaptain ? '<span style="font-size:0.7rem;font-weight:700;color:var(--accent-yellow);">(c)</span>' : ''} <span style="font-size:0.7rem; color:var(--text-muted); margin-left:0.25rem;">${p.role}</span></td>
           <td class="text-right" style="color:var(--accent-blue);">${overs}</td>
           <td class="text-right">${t.bowlMaidens}</td>
           <td class="text-right">${t.bowlRuns}</td>

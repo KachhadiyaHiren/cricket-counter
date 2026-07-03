@@ -715,9 +715,10 @@ body {
 /* ── BALANCER SECTION & TEAMS DISPLAY ── */
 .balancer-controls {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 .teams-container {
@@ -1685,17 +1686,24 @@ body {
   overflow-x: auto;
 }
 
+.stats-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .stats-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.88rem;
+  font-size: 0.83rem;
   text-align: left;
+  min-width: 320px;
 }
 
 .stats-table th,
 .stats-table td {
-  padding: 0.6rem 0.85rem;
+  padding: 0.45rem 0.55rem;
   border-bottom: 1px solid var(--border);
+  white-space: nowrap;
 }
 
 .stats-table th {
