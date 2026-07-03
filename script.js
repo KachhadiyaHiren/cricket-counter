@@ -10,26 +10,26 @@ const STORAGE_KEY = "cricscore_extended_state_clean_v10";
 
 // ── DEFAULT 20 PLAYERS POOL ──
 const DEFAULT_PLAYERS = [
-  { id: "p1", name: "Ambar", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
-  { id: "p2", name: "Hardik", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
-  { id: "p3", name: "Umesh", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
-  { id: "p4", name: "Mehul", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
-  { id: "p5", name: "krish", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
-  { id: "p6", name: "j acharya", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
-  { id: "p7", name: "Hiren", role: "Bowler", isCaptain: false, isCommon: false, available: true },
-  { id: "p8", name: "Dhruvil", role: "Batter", isCaptain: false, isCommon: false, available: true },
-  { id: "p9", name: "Naresh Chanchad", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
-  { id: "p10", name: "Tarun", role: "Bowler", isCaptain: false, isCommon: false, available: true },
-  { id: "p11", name: "Prerak", role: "Batter", isCaptain: false, isCommon: false, available: true },
-  { id: "p12", name: "Shyam", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
-  { id: "p13", name: "Umesh K", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
-  { id: "p14", name: "Hiren K(OG)", role: "Bowler", isCaptain: false, isCommon: false, available: true },
-  { id: "p15", name: "Shailesh", role: "Bowler", isCaptain: false, isCommon: false, available: true },
-  { id: "p16", name: "Shankar", role: "Batter", isCaptain: false, isCommon: false, available: true },
-  { id: "p17", name: "Siddhesh", role: "All-rounder", isCaptain: false, isCommon: false, available: true },
-  { id: "p18", name: "Vimal", role: "Batter", isCaptain: false, isCommon: false, available: true },
-  { id: "p19", name: "Niraj", role: "Bowler", isCaptain: false, isCommon: false, available: true },
-  { id: "p20", name: "Chintan", role: "All-rounder", isCaptain: false, isCommon: false, available: true }
+  { id: "p1",  name: "Ambar",          role: "All-rounder", available: true },
+  { id: "p2",  name: "Hardik",         role: "All-rounder", available: true },
+  { id: "p3",  name: "Umesh",          role: "All-rounder", available: true },
+  { id: "p4",  name: "Mehul",          role: "All-rounder", available: true },
+  { id: "p5",  name: "krish",          role: "All-rounder", available: true },
+  { id: "p6",  name: "j acharya",      role: "All-rounder", available: true },
+  { id: "p7",  name: "Hiren",          role: "Bowler",      available: true },
+  { id: "p8",  name: "Dhruvil",        role: "Batter",      available: true },
+  { id: "p9",  name: "Naresh Chanchad",role: "All-rounder", available: true },
+  { id: "p10", name: "Tarun",          role: "Bowler",      available: true },
+  { id: "p11", name: "Prerak",         role: "Batter",      available: true },
+  { id: "p12", name: "Shyam",          role: "All-rounder", available: true },
+  { id: "p13", name: "Umesh K",        role: "All-rounder", available: true },
+  { id: "p14", name: "Hiren K(OG)",    role: "Bowler",      available: true },
+  { id: "p15", name: "Shailesh",       role: "Bowler",      available: true },
+  { id: "p16", name: "Shankar",        role: "Batter",      available: true },
+  { id: "p17", name: "Siddhesh",       role: "All-rounder", available: true },
+  { id: "p18", name: "Vimal",          role: "Batter",      available: true },
+  { id: "p19", name: "Niraj",          role: "Bowler",      available: true },
+  { id: "p20", name: "Chintan",        role: "All-rounder", available: true }
 ];
 
 // ── INITIAL APP STATE ──
