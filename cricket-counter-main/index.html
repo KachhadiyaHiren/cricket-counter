@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cricket Score Counter (Static)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Bebas+Neue&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Background texture -->
+  <div class="bg-field"></div>
+  <div class="noise-overlay"></div>
+
+  <div class="app-shell">
+
+    <!-- ── HEADER ── -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="logo">
+          <span class="logo-icon">🏏</span>
+          <span class="logo-text">CRICSCORE</span>
+        </div>
+        <div class="innings-badge" id="inningsBadge">1st Innings</div>
+      </div>
+    </header>
+
+    <!-- ── SCOREBOARD ── -->
+    <section class="scoreboard">
+
+      <!-- Overs Selector — visible only in 1st innings -->
+      <div class="overs-selector" id="oversSelector">
+        <span class="overs-sel-label">Match Overs</span>
+        <div class="overs-stepper">
+          <button class="step-btn" onclick="changeOvers(-1)">−</button>
+          <span class="overs-value" id="oversValue">6</span>
+          <button class="step-btn" onclick="changeOvers(1)">+</button>
+        </div>
+      </div>
+      <div class="score-main">
+        <div class="score-display">
+          <span class="score-runs" id="scoreRuns">0</span>
+          <span class="score-sep">/</span>
+          <span class="score-wickets" id="scoreWickets">0</span>
+          <button class="score-refresh-btn" onclick="refreshScore()" title="Reset Score">↻</button>
+        </div>
+        <div class="score-overs-label">runs / wickets</div>
+      </div>
+
+      <div class="score-meta">
+        <div class="meta-card">
+          <div class="meta-value" id="metaOvers">0.0</div>
+          <div class="meta-label">Overs / <span id="metaMaxOvers">6</span></div>
+          <div class="overs-progress-wrap">
+            <div class="overs-progress-bar" id="oversProgressBar"></div>
+          </div>
+        </div>
+        <div class="meta-card highlight">
+          <div class="meta-value" id="metaRunRate">0.00</div>
+          <div class="meta-label">Run Rate</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-value" id="metaExtras">0</div>
+          <div class="meta-label">Extras</div>
+        </div>
+      </div>
+
+      <!-- Target info (2nd innings only) -->
+      <div class="target-bar hidden" id="targetBar">
+        <div class="target-inner">
+          <span class="target-label">Target</span>
+          <span class="target-value" id="targetValue">—</span>
+          <span class="target-sep">·</span>
+          <span class="target-label">Need</span>
+          <span class="target-need" id="targetNeed">—</span>
+          <span class="target-sep">·</span>
+          <span class="target-label">RRR</span>
+          <span class="target-rrr" id="targetRrr">—</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="last-ball-row">
+      <div class="this-over-label">This Over</div>
+      <div class="this-over-dots" id="thisOverDots"></div>
+    </div>
+
+    <!-- ── NO BALL PENDING PANEL ── -->
+    <section class="nb-panel hidden" id="nbPanel">
+      <div class="nb-panel-header">
+        <span class="nb-badge">NO BALL</span>
+        <span class="nb-hint">Select runs scored off the bat, or run-out</span>
+      </div>
+      <div class="nb-run-grid">
+        <button class="nb-run-btn" onclick="sendNBRuns(0)">0</button>
+        <button class="nb-run-btn" onclick="sendNBRuns(1)">1</button>
+        <button class="nb-run-btn" onclick="sendNBRuns(2)">2</button>
+        <button class="nb-run-btn" onclick="sendNBRuns(3)">3</button>
+        <button class="nb-run-btn nb-4" onclick="sendNBRuns(4)">4</button>
+        <button class="nb-run-btn nb-6" onclick="sendNBRuns(6)">6</button>
+      </div>
+      <button class="nb-wicket-btn" onclick="sendNBWicket()">Run Out 🔴 (Wicket on NB)</button>
+    </section>
+
+    <!-- ── BALL INPUT BUTTONS ── -->
+    <section class="input-section hidden" id="inputSection">
+      <div class="input-label">Ball Result</div>
+      <div class="ball-grid">
+        <button class="ball-btn run-0" data-type="0" onclick="sendBall('0')">0</button>
+        <button class="ball-btn run-1" data-type="1" onclick="sendBall('1')">1</button>
+        <button class="ball-btn run-2" data-type="2" onclick="sendBall('2')">2</button>
+        <button class="ball-btn run-3" data-type="3" onclick="sendBall('3')">3</button>
+        <button class="ball-btn run-4" data-type="4" onclick="sendBall('4')">4</button>
+        <button class="ball-btn run-6" data-type="6" onclick="sendBall('6')">6</button>
+        <button class="ball-btn wide" data-type="WD" onclick="sendBall('WD')">Wide</button>
+        <button class="ball-btn noball" data-type="NB" onclick="sendBall('NB')">No Ball</button>
+        <button class="ball-btn wicket" data-type="W" onclick="sendBall('W')">Wicket 🔴</button>
+      </div>
+    </section>
+
+
+    <!-- ── CONTROLS ── -->
+    <section class="controls-section hidden" id="controlsSection">
+      <button class="ctrl-btn undo-btn" onclick="undoBall()">
+        <span class="ctrl-icon">↩</span> Undo
+      </button>
+      <button class="ctrl-btn second-innings-btn" id="secondInningsBtn" onclick="startSecondInnings()">
+        <span class="ctrl-icon">🔄</span> 2nd Innings
+      </button>
+      <button class="ctrl-btn reset-btn" onclick="resetMatch()">
+        <span class="ctrl-icon">✕</span> Reset
+      </button>
+    </section>
+
+    <!-- ── RECENT HISTORY ── -->
+    <section class="history-section">
+      <div class="history-header">Over History</div>
+      <div class="history-list" id="historyList">
+        <div class="history-empty">No balls bowled yet</div>
+      </div>
+    </section>
+
+    <!-- ── INNINGS / MATCH OVER OVERLAY ── -->
+    <div class="match-over-overlay hidden" id="matchOverOverlay">
+      <div class="match-over-card">
+        <div class="match-over-emoji" id="matchOverEmoji">🏏</div>
+        <div class="match-over-title" id="matchOverTitle">Innings Over!</div>
+        <div class="match-over-sub" id="matchOverSub"></div>
+        <!-- Shown only at end of 1st innings -->
+        <button class="ctrl-btn second-innings-btn" id="overlayStartSecond" style="margin-top:1.5rem;width:100%"
+          onclick="startSecondInnings()">
+          <span class="ctrl-icon">🏏</span> Start 2nd Innings
+        </button>
+        <!-- Shown only at end of 2nd innings / full match -->
+        <button class="ctrl-btn reset-btn" id="overlayNewMatch" style="margin-top:0.75rem;width:100%"
+          onclick="resetMatch()">
+          <span class="ctrl-icon">✕</span> New Match
+        </button>
+      </div>
+    </div>
+
+  </div><!-- end app-shell -->
+
+  <script src="script.js"></script>
+</body>
+
+</html>

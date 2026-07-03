@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CricScore – Team Balancer & Scorecard</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background Layer -->
+  <div class="bg-stadium"></div>
+  <div class="noise-overlay"></div>
+
+  <!-- App Wrapper -->
+  <div class="app-container">
+    
+    <!-- ── HEADER ── -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="logo">
+          <span class="logo-emoji">🏏</span>
+          <span class="logo-title">CRICSCORE</span>
+        </div>
+        <div class="header-badges">
+          <span class="badge" id="globalMatchPhase">Setup Phase</span>
+        </div>
+      </div>
+      
+      <!-- Nav Tabs -->
+      <nav class="app-nav">
+        <button class="nav-tab active" data-tab="squads-tab">
+          <span class="tab-icon">👥</span> Squads
+        </button>
+        <button class="nav-tab" data-tab="toss-tab" id="navTossTab">
+          <span class="tab-icon">🪙</span> Toss
+        </button>
+        <button class="nav-tab" data-tab="scoring-tab" id="navScoringTab">
+          <span class="tab-icon">📊</span> Scorecard
+        </button>
+        <button class="nav-tab" data-tab="stats-tab" id="navStatsTab">
+          <span class="tab-icon">🏆</span> Stats
+        </button>
+      </nav>
+    </header>
+
+    <!-- ── MAIN CONTENT PANELS ── -->
+    <main class="app-main">
+
+      <!-- ── TAB 1: SQUADS & TEAM BALANCER ── -->
+      <section class="tab-panel active" id="squads-tab">
+        <!-- Player Pool Form -->
+        <div class="card glass">
+          <h2 class="section-title">Add New Player</h2>
+          <form id="playerForm" class="player-form">
+            <div class="input-group">
+              <label for="playerName">Player Name</label>
+              <input type="text" id="playerName" placeholder="Enter name..." required autocomplete="off">
+            </div>
+            
+            <div class="input-row">
+              <div class="input-group" style="grid-column: 1 / -1;">
+                <label for="playerRole">Role</label>
+                <select id="playerRole">
+                  <option value="Batter">Batter 🏏</option>
+                  <option value="Bowler">Bowler 🥎</option>
+                  <option value="All-rounder">All-rounder ⚡</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-footer" style="flex-wrap: wrap; gap: 0.75rem 1.5rem;">
+              <label class="checkbox-container">
+                <input type="checkbox" id="playerIsCaptain">
+                <span class="checkmark"></span>
+                Is Captain 👑
+              </label>
+              <label class="checkbox-container">
+                <input type="checkbox" id="playerIsCommon">
+                <span class="checkmark"></span>
+                Common Player 🤝
+              </label>
+              <button type="submit" class="btn btn-primary">Add Player</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Player Pool Table Card -->
+        <div class="card glass">
+          <div class="card-header-flex">
+            <div>
+              <h2 class="section-title">Player Pool</h2>
+              <p class="subtitle" id="poolSummary">0 players registered (0 available)</p>
+            </div>
+            <div class="card-header-actions">
+              <button class="btn btn-outline btn-sm" onclick="resetToDefaultPool()">Reset Pool</button>
+              <button class="btn btn-outline btn-sm btn-danger-hover" onclick="clearPlayerPool()">Clear Pool</button>
+              <button class="btn btn-outline btn-sm btn-danger-hover" onclick="resetEntireApp()" style="background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.2); color: var(--accent-red);">⚠️ Complete Reset</button>
+            </div>
+          </div>
+
+          <!-- Quick Select Filters -->
+          <div class="pool-filters">
+            <button class="btn btn-sm btn-outline active" onclick="toggleSelectAllPlayers(true)">Select All</button>
+            <button class="btn btn-sm btn-outline" onclick="toggleSelectAllPlayers(false)">Deselect All</button>
+          </div>
+
+          <!-- Players Scroll Wrapper -->
+          <div class="table-scroll">
+            <table class="players-table" id="poolTable">
+              <thead>
+                <tr>
+                  <th width="50" style="text-align: center;">Play</th>
+                  <th>Player</th>
+                  <th>Role</th>
+                  <th width="100" style="text-align: center;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="poolTableBody">
+                <!-- Javascript will populate this -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Balancing & Team Generation Panel -->
+        <div class="card glass highlighted-card">
+          <h2 class="section-title">Match Team Balancer</h2>
+          <p class="subtitle">Select players in the list above, then click generate. The algorithm balances size, roles, and captains.</p>
+          
+          <div class="balancer-controls">
+            <button class="btn btn-primary btn-lg btn-glow" id="btnGenerateTeams" onclick="generateBalancedTeams()">
+              ⚡ Balance & Generate Teams
+            </button>
+            <button class="btn btn-outline btn-lg hidden" id="btnShuffleTeams" onclick="generateBalancedTeams(true)">
+              🔄 Shuffle Teams
+            </button>
+            <button class="btn btn-outline btn-lg btn-danger-hover hidden" id="btnClearTeams" onclick="clearGeneratedTeams()">
+              🗑️ Clear Teams
+            </button>
+          </div>
+
+          <!-- Unassigned Available Players for Manual Assignment -->
+          <div class="unassigned-container hidden" id="unassignedPlayersWrapper" style="margin-bottom: 1.5rem; background: rgba(15, 23, 42, 0.03); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+            <h3 class="section-title" style="font-size: 1rem; margin-bottom: 0.5rem; color: var(--text-secondary);">Unassigned Available Players</h3>
+            <div class="unassigned-list" id="unassignedPlayerList" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <!-- Dynamic -->
+            </div>
+          </div>
+
+          <!-- Generated Teams View -->
+          <div class="teams-container hidden" id="generatedTeamsContainer">
+            <div class="team-card team-a-card glass">
+              <div class="team-header color-a">
+                <h3>TEAM 1</h3>
+                <span class="team-stats-badge" id="teamAStats">0 Players</span>
+              </div>
+              <div class="team-meta-info" id="teamAMeta">
+                <!-- Stats breakdown -->
+              </div>
+              <ul class="team-player-list" id="teamAPlayerList">
+                <!-- Populated dynamically -->
+              </ul>
+            </div>
+
+            <div class="team-card team-b-card glass">
+              <div class="team-header color-b">
+                <h3>TEAM 2</h3>
+                <span class="team-stats-badge" id="teamBStats">0 Players</span>
+              </div>
+              <div class="team-meta-info" id="teamBMeta">
+                <!-- Stats breakdown -->
+              </div>
+              <ul class="team-player-list" id="teamBPlayerList">
+                <!-- Populated dynamically -->
+              </ul>
+            <!-- Common / Neutral Players Box -->
+            <div class="common-players-card glass" id="commonPlayersCard" style="grid-column: 1 / -1; background: rgba(59, 130, 246, 0.05); border: 1px dashed rgba(59, 130, 246, 0.25); padding: 1rem; border-radius: var(--radius-sm); margin-top: 1rem; display: none;">
+              <h4 style="margin: 0 0 0.5rem; color: var(--accent-blue); font-size: 0.95rem; font-family: 'Rajdhani', sans-serif; font-weight: 700;">🤝 Common Players (Playable for both teams)</h4>
+              <div id="commonPlayersList" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <!-- Dynamic list -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Confirm / Proceed Section -->
+          <div class="proceed-section hidden" id="proceedSection">
+            <button class="btn btn-primary btn-lg btn-block" onclick="proceedToToss()">
+              Proceed to Coin Toss 🪙 👉
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB 2: MODERN COIN TOSS ── -->
+      <section class="tab-panel" id="toss-tab">
+        <div class="card glass toss-card-wrapper">
+          <h2 class="section-title text-center">Interactive Coin Toss</h2>
+          <p class="subtitle text-center">Decide who bowls or bats first with a highly random 3D spin.</p>
+
+          <!-- Toss Configuration -->
+          <div class="toss-config">
+            <div class="toss-field">
+              <label for="tossCaller">Who calls the coin?</label>
+              <select id="tossCaller">
+                <option value="team1">Team 1 Captain</option>
+                <option value="team2">Team 2 Captain</option>
+              </select>
+            </div>
+
+            <div class="toss-field">
+              <label>Select Call Choice:</label>
+              <div class="segmented-control">
+                <input type="radio" name="tossChoice" id="tossChoiceHeads" value="Heads" checked>
+                <label for="tossChoiceHeads">Heads 🏏</label>
+                
+                <input type="radio" name="tossChoice" id="tossChoiceTails" value="Tails">
+                <label for="tossChoiceTails">Tails 🏆</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3D Coin Spinner Container -->
+          <div class="coin-container">
+            <div class="coin" id="tossCoin">
+              <div class="coin-side coin-front">
+                <div class="coin-inner">🏏<div class="coin-text">HEADS</div></div>
+              </div>
+              <div class="coin-side coin-back">
+                <div class="coin-inner">🏆<div class="coin-text">TAILS</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <div class="text-center" style="margin-top: 2rem;">
+            <button class="btn btn-primary btn-lg btn-glow" id="btnFlipCoin" onclick="flipCoin()">
+              💫 Flip Coin
+            </button>
+          </div>
+
+          <!-- Result Overlay Card -->
+          <div class="toss-result-card hidden" id="tossResultCard">
+            <div class="toss-result-title" id="tossResultTitle">Heads!</div>
+            <div class="toss-result-message" id="tossResultMessage">Team 1 won the toss!</div>
+            
+            <div class="toss-choice-panel" id="tossDecisionSection">
+              <p>Choose what to do:</p>
+              <div class="toss-decision-buttons">
+                <button class="btn btn-primary" onclick="setTossDecision('Batting')">🏏 Bat First</button>
+                <button class="btn btn-outline" onclick="setTossDecision('Bowling')">🥎 Bowl First</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ready to Score State -->
+          <div class="toss-finalized-card hidden" id="tossFinalizedCard">
+            <div class="final-dec-box">
+              <span class="final-dec-emoji">📢</span>
+              <span id="finalTossText">Team 1 won the toss and elected to Bat</span>
+            </div>
+            
+            <div class="match-overs-config">
+              <label for="matchOvers">Select Match Overs:</label>
+              <div class="overs-control">
+                <button class="btn btn-outline btn-sm" onclick="changeOversInput(-1)">−</button>
+                <span class="overs-input-value" id="matchOversDisplay">6</span>
+                <button class="btn btn-outline btn-sm" onclick="changeOversInput(1)">+</button>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-lg btn-block btn-glow" onclick="startMatchScorecard()">
+              Start Match Scorecard 🚀
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB 3: LIVE SCORECARD ── -->
+      <section class="tab-panel" id="scoring-tab">
+        
+        <!-- Scoreboard Info Bar -->
+        <div class="card glass scoreboard-hero">
+          <div class="hero-header">
+            <div class="batting-team-title" id="liveBattingTeam">Team Name Batting</div>
+            <div class="innings-badge-score" id="liveInningsBadge">1st Innings</div>
+          </div>
+
+          <!-- Score Metrics -->
+          <div class="hero-score-row">
+            <div class="score-primary">
+              <span class="runs-num" id="liveRuns">0</span>
+              <span class="slash">/</span>
+              <span class="wickets-num" id="liveWickets">0</span>
+            </div>
+            
+            <div class="overs-metric">
+              <div class="overs-val"><span id="liveOvers">0.0</span> / <span id="liveMaxOvers">6</span></div>
+              <div class="overs-lbl">Overs Bowled</div>
+            </div>
+          </div>
+
+          <!-- Overs Progress Bar -->
+          <div class="hero-progress-wrapper">
+            <div class="hero-progress-bar" id="liveOversProgressBar"></div>
+          </div>
+
+          <!-- Core Run Rates -->
+          <div class="hero-runrates">
+            <div class="rr-card">
+              <span class="rr-val" id="liveRunRate">0.00</span>
+              <span class="rr-lbl">Run Rate</span>
+            </div>
+            <div class="rr-card">
+              <span class="rr-val" id="liveExtras">0</span>
+              <span class="rr-lbl">Extras (WD/NB)</span>
+            </div>
+            <div class="rr-card highlight-orange hidden" id="targetCardWrapper">
+              <span class="rr-val" id="liveTarget">--</span>
+              <span class="rr-lbl">Target / Need <span id="liveTargetNeed">--</span> (RRR <span id="liveRrr">--</span>)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Over History Dots Bar -->
+        <div class="card glass dot-balls-card">
+          <div class="dot-flex">
+            <span class="dot-title">This Over:</span>
+            <div class="dot-container" id="liveOverDots">
+              <!-- Dots will be populated here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Players Card (BATSMEN & BOWLERS STATS) -->
+        <div class="active-players-section">
+          <!-- Batsmen Card -->
+          <div class="card glass active-card">
+            <div class="card-hdr">
+              <span class="card-icon">🏏</span>
+              <h3>Active Batting</h3>
+            </div>
+            <div class="batsmen-stats-container">
+              <!-- Batsman 1 -->
+              <div class="batsman-row" id="batsman1Row">
+                <div class="batsman-info-strike" onclick="setStrike(1)">
+                  <span class="strike-indicator" id="strike1">🏏</span>
+                  <span class="batsman-name" id="batsman1Name">Batter 1</span>
+                </div>
+                <div class="batsman-runs-stats">
+                  <span class="batsman-runs" id="batsman1Runs">0</span>
+                  <span class="batsman-balls" id="batsman1Balls">(0)</span>
+                </div>
+                <div class="batsman-substats">
+                  <span>4s: <strong id="batsman1Fours">0</strong></span>
+                  <span>6s: <strong id="batsman1Sixes">0</strong></span>
+                  <span>SR: <strong id="batsman1SR">0.0</strong></span>
+                </div>
+              </div>
+              <!-- Batsman 2 -->
+              <div class="batsman-row" id="batsman2Row">
+                <div class="batsman-info-strike" onclick="setStrike(2)">
+                  <span class="strike-indicator" id="strike2"></span>
+                  <span class="batsman-name" id="batsman2Name">Batter 2</span>
+                </div>
+                <div class="batsman-runs-stats">
+                  <span class="batsman-runs" id="batsman2Runs">0</span>
+                  <span class="batsman-balls" id="batsman2Balls">(0)</span>
+                </div>
+                <div class="batsman-substats">
+                  <span>4s: <strong id="batsman2Fours">0</strong></span>
+                  <span>6s: <strong id="batsman2Sixes">0</strong></span>
+                  <span>SR: <strong id="batsman2SR">0.0</strong></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bowler Card -->
+          <div class="card glass active-card">
+            <div class="card-hdr">
+              <span class="card-icon">🥎</span>
+              <h3>Active Bowler</h3>
+            </div>
+            <div class="bowler-stats-container" id="activeBowlerWrapper">
+              <div class="bowler-main-row">
+                <span class="bowler-name" id="activeBowlerName">Select Bowler</span>
+                <span class="bowler-figures" id="activeBowlerFigures">0 - 0 - 0 - 0</span>
+              </div>
+              <div class="bowler-substats">
+                <span>Overs: <strong id="activeBowlerOvers">0.0</strong></span>
+                <span>Maidens: <strong id="activeBowlerMaidens">0</strong></span>
+                <span>Runs: <strong id="activeBowlerRuns">0</strong></span>
+                <span>Wickets: <strong id="activeBowlerWickets">0</strong></span>
+                <span>Econ: <strong id="activeBowlerEcon">0.0</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Ball Detail Overlay Panel (appears on clicking NB) -->
+        <div class="nb-panel-overlay hidden" id="scoringNbPanel">
+          <div class="nb-hdr">
+            <span class="badge badge-orange">NO BALL</span>
+            <p>Select runs scored off the bat or wicket:</p>
+          </div>
+          <div class="nb-btn-grid">
+            <button class="btn btn-outline" onclick="recordNbResult(0)">0 Runs</button>
+            <button class="btn btn-outline" onclick="recordNbResult(1)">1 Run</button>
+            <button class="btn btn-outline" onclick="recordNbResult(2)">2 Runs</button>
+            <button class="btn btn-outline" onclick="recordNbResult(3)">3 Runs</button>
+            <button class="btn btn-outline btn-success-hover" onclick="recordNbResult(4)">4 Runs 🏏</button>
+            <button class="btn btn-outline btn-warning-hover" onclick="recordNbResult(6)">6 Runs 🚀</button>
+          </div>
+          <button class="btn btn-danger btn-block" style="margin-top: 0.75rem;" onclick="recordNbWicket()">
+            🚨 Run Out Wicket
+          </button>
+        </div>
+
+        <!-- Ball Input Controls -->
+        <div class="card glass ball-input-card" id="ballInputControls">
+          <div class="card-hdr" style="margin-bottom: 0.75rem;">
+            <span class="card-icon">🕹️</span>
+            <h3>Bowled Ball Result</h3>
+          </div>
+          <div class="score-input-grid">
+            <button class="score-btn key-0" onclick="recordBall('0')">0</button>
+            <button class="score-btn key-1" onclick="recordBall('1')">1</button>
+            <button class="score-btn key-2" onclick="recordBall('2')">2</button>
+            <button class="score-btn key-3" onclick="recordBall('3')">3</button>
+            <button class="score-btn key-4 btn-4" onclick="recordBall('4')">4</button>
+            <button class="score-btn key-6 btn-6" onclick="recordBall('6')">6</button>
+            <button class="score-btn key-wd" onclick="recordBall('WD')">Wide</button>
+            <button class="score-btn key-nb" onclick="recordBall('NB')">No Ball</button>
+            <button class="score-btn key-w btn-w" onclick="recordBall('W')">Wicket 🔴</button>
+          </div>
+        </div>
+
+        <!-- Match Actions Bottom Controls -->
+        <div class="scoring-actions">
+          <button class="btn btn-outline" onclick="undoLastBall()">
+            ↩️ Undo Ball
+          </button>
+          <button class="btn btn-outline" onclick="swapStrikeManual()">
+            🔄 Swap Strike
+          </button>
+          <button class="btn btn-outline btn-danger-hover" onclick="restartCurrentMatch()">
+            ❌ Reset Match
+          </button>
+        </div>
+
+        <!-- Recent Log History List -->
+        <div class="card glass match-history-card">
+          <h3 class="section-title">Innings Ball History</h3>
+          <div class="history-scroll-list" id="scoringHistoryList">
+            <p class="text-muted text-center" style="padding: 1rem;">No balls recorded yet.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB 4: COMPREHENSIVE MATCH STATS ── -->
+      <section class="tab-panel" id="stats-tab">
+        <!-- Live Match Summary Summary Card -->
+        <div class="card glass text-center">
+          <h2 class="section-title">Full Match Stats & Scorecard</h2>
+          <p class="subtitle" id="statsMatchStatusText">Setup or Toss phase in progress.</p>
+          <button class="btn btn-outline btn-sm" onclick="exportStateToJSON()">Export Match State</button>
+        </div>
+
+        <!-- Series Cumulative Leaderboard -->
+        <div class="card glass" id="statsCumulativeWrapper" style="margin-top: 1.5rem;">
+          <h2 class="section-title">Series Leaderboard (Cumulative Totals)</h2>
+          <p class="subtitle" style="margin-bottom: 1.25rem;">Cumulative tournament figures. Click a player row to view match-by-match breakdown.</p>
+          
+          <h3 class="innings-header color-a" style="margin-top: 1rem;">Cumulative Batting</h3>
+          <div class="card glass no-padding" style="margin-bottom: 1.5rem; overflow: visible;">
+            <div class="stats-table-wrapper" style="overflow: visible;">
+              <table class="stats-table">
+                <thead>
+                  <tr>
+                    <th width="30"></th>
+                    <th>Batsman</th>
+                    <th class="text-right">Runs</th>
+                    <th class="text-right">Balls</th>
+                    <th class="text-right">4s</th>
+                    <th class="text-right">6s</th>
+                    <th class="text-right">Outs</th>
+                    <th class="text-right">SR</th>
+                  </tr>
+                </thead>
+                <tbody id="statsCumulativeBattingBody">
+                  <!-- Dynamic -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h3 class="innings-header color-b">Cumulative Bowling</h3>
+          <div class="card glass no-padding" style="margin-bottom: 0.5rem; overflow: visible;">
+            <div class="stats-table-wrapper" style="overflow: visible;">
+              <table class="stats-table">
+                <thead>
+                  <tr>
+                    <th width="30"></th>
+                    <th>Bowler</th>
+                    <th class="text-right">Overs</th>
+                    <th class="text-right">Maidens</th>
+                    <th class="text-right">Runs</th>
+                    <th class="text-right">Wickets</th>
+                    <th class="text-right">Econ</th>
+                  </tr>
+                </thead>
+                <tbody id="statsCumulativeBowlingBody">
+                  <!-- Dynamic -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Container -->
+        <div id="statsScorecardTables" class="hidden">
+          <!-- Innings 1 Accordion / Section -->
+          <div class="stats-innings-section">
+            <h3 class="innings-header color-a" id="statsInnings1Header">1st Innings: Team 1</h3>
+            
+            <div class="card glass no-padding" style="margin-bottom: 1.5rem;">
+              <div class="stats-table-wrapper">
+                <table class="stats-table">
+                  <thead>
+                    <tr>
+                      <th>Batsman</th>
+                      <th>Status</th>
+                      <th class="text-right">R</th>
+                      <th class="text-right">B</th>
+                      <th class="text-right">4s</th>
+                      <th class="text-right">6s</th>
+                      <th class="text-right">SR</th>
+                    </tr>
+                  </thead>
+                  <tbody id="statsInnings1BattingBody">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="stats-innings-total" id="statsInnings1BattingTotal">
+                Total: 0/0 (0.0 Overs)
+              </div>
+            </div>
+
+            <div class="card glass no-padding">
+              <div class="stats-table-wrapper">
+                <table class="stats-table">
+                  <thead>
+                    <tr>
+                      <th>Bowler</th>
+                      <th class="text-right">O</th>
+                      <th class="text-right">M</th>
+                      <th class="text-right">R</th>
+                      <th class="text-right">W</th>
+                      <th class="text-right">Econ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="statsInnings1BowlingBody">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Innings 2 Accordion / Section -->
+          <div class="stats-innings-section" style="margin-top: 2rem;" id="statsInnings2Wrapper">
+            <h3 class="innings-header color-b" id="statsInnings2Header">2nd Innings: Team 2</h3>
+            
+            <div class="card glass no-padding" style="margin-bottom: 1.5rem;">
+              <div class="stats-table-wrapper">
+                <table class="stats-table">
+                  <thead>
+                    <tr>
+                      <th>Batsman</th>
+                      <th>Status</th>
+                      <th class="text-right">R</th>
+                      <th class="text-right">B</th>
+                      <th class="text-right">4s</th>
+                      <th class="text-right">6s</th>
+                      <th class="text-right">SR</th>
+                    </tr>
+                  </thead>
+                  <tbody id="statsInnings2BattingBody">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="stats-innings-total" id="statsInnings2BattingTotal">
+                Total: 0/0 (0.0 Overs)
+              </div>
+            </div>
+
+            <div class="card glass no-padding">
+              <div class="stats-table-wrapper">
+                <table class="stats-table">
+                  <thead>
+                    <tr>
+                      <th>Bowler</th>
+                      <th class="text-right">O</th>
+                      <th class="text-right">M</th>
+                      <th class="text-right">R</th>
+                      <th class="text-right">W</th>
+                      <th class="text-right">Econ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="statsInnings2BowlingBody">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div> <!-- End App Wrapper -->
+
+
+  <!-- ── DIALOG / MODAL POPUPS (CRITICAL WORKFLOWS) ── -->
+
+  <!-- WICKET DISMISSAL DIALOG -->
+  <div class="modal-backdrop hidden" id="wicketModal">
+    <div class="modal-card glass">
+      <div class="modal-header">
+        <h3>🚨 Wicket Fallen!</h3>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc" id="wicketModalDesc">Batsman is out. Select dismissal mode and new batsman.</p>
+        
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label for="dismissalType">Dismissal Mode:</label>
+          <select id="dismissalType" class="modal-select">
+            <option value="Bowled">Bowled 🥎</option>
+            <option value="Caught">Caught 🤲</option>
+            <option value="LBW">LBW 🦵</option>
+            <option value="Run Out">Run Out 🔴</option>
+            <option value="Stumped">Stumped 🧤</option>
+            <option value="Retired">Retired Hurt 🤕</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="newBatsmanSelect">Next Batsman to Bat:</label>
+          <select id="newBatsmanSelect" class="modal-select">
+            <!-- Dynamic list of players yet to bat -->
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary btn-block" onclick="submitWicketDismissal()">Confirm Wicket & Resume</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOWLER SELECTION DIALOG (End of Over) -->
+  <div class="modal-backdrop hidden" id="bowlerModal">
+    <div class="modal-card glass">
+      <div class="modal-header">
+        <h3>🥎 Select Next Bowler</h3>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Over complete. Please select the bowler for the next over.</p>
+        
+        <div class="form-group">
+          <label for="newBowlerSelect">Bowler:</label>
+          <select id="newBowlerSelect" class="modal-select">
+            <!-- Dynamic list of fielding players (excluding the last bowler) -->
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary btn-block" onclick="submitBowlerChange()">Confirm Bowler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BATSMAN STRIKER REPLACEMENT DIALOG (To change active batsmen when starting innings) -->
+  <div class="modal-backdrop hidden" id="openersModal">
+    <div class="modal-card glass">
+      <div class="modal-header">
+        <h3>🏏 Select Opening Batsmen</h3>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Select the two opening batsmen to start the innings.</p>
+        
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label for="openerStriker">Striker (On strike):</label>
+          <select id="openerStriker" class="modal-select">
+            <!-- Dynamic -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="openerNonStriker">Non-Striker:</label>
+          <select id="openerNonStriker" class="modal-select">
+            <!-- Dynamic -->
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary btn-block" onclick="submitOpeningBatsmen()">Start Innings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INNINGS OVER / MATCH SUMMARY OVERLAY -->
+  <div class="modal-backdrop hidden" id="inningsOverModal">
+    <div class="modal-card glass text-center">
+      <div class="modal-emoji" id="inningsOverEmoji">🎉</div>
+      <h3 id="inningsOverTitle">Innings Complete!</h3>
+      <p class="modal-desc" id="inningsOverDesc" style="margin: 0.75rem 0 1.5rem; line-height: 1.5;">Final Score: 0/0</p>
+      
+      <div id="inningsOverActions">
+        <button class="btn btn-primary btn-block btn-lg btn-glow" id="btnTransitionInnings" onclick="transitionToSecondInnings()">
+          Start 2nd Innings 🏏
+        </button>
+        <button class="btn btn-primary btn-block btn-lg btn-glow hidden" id="btnNextMatch" onclick="playNextMatchSeries()" style="margin-bottom:0.75rem;">
+          Play Next Match (Winner Bats) 🚀
+        </button>
+        <button class="btn btn-outline btn-block btn-lg hidden" id="btnRestartFromOverlay" onclick="resetMatchData()">
+          New Match / Reset 🔄
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT -->
+  <script src="script.js"></script>
+</body>
+</html>
